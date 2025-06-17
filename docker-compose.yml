@@ -1,0 +1,86 @@
+services:
+  spark:
+    image: bitnami/spark:3.3.1
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_USER=spark
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - HOME=/tmp
+    volumes:
+      - ./data:/workspace/data
+      - ./01_Getting_&_Knowing_Your_Data:/workspace/01
+      - ./02_Filtering_&_Sorting:/workspace/02
+      - ./03_Grouping:/workspace/03
+      - ./04_Apply:/workspace/04
+      - ./05_Merge:/workspace/05
+      - ./06_Stats:/workspace/06
+      - ./07_Visualization:/workspace/07
+      - ./08_Creating_Series_and_DataFrames:/workspace/08
+      - ./09_Time_Series:/workspace/09
+      - ./10_Deleting:/workspace/10
+      - ./11_Indexing:/workspace/11
+      - spark_home:/tmp
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+
+  spark-worker:
+    image: bitnami/spark:3.3.1
+    container_name: spark-worker
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_USER=spark2
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_WORKER_CORES=1
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - HOME=/tmp
+    depends_on:
+      - spark
+    volumes:
+      - ./data:/workspace/data
+      - ./01_Getting_&_Knowing_Your_Data:/workspace/01
+      - ./02_Filtering_&_Sorting:/workspace/02
+      - ./03_Grouping:/workspace/03
+      - ./04_Apply:/workspace/04
+      - ./05_Merge:/workspace/05
+      - ./06_Stats:/workspace/06
+      - ./07_Visualization:/workspace/07
+      - ./08_Creating_Series_and_DataFrames:/workspace/08
+      - ./09_Time_Series:/workspace/09
+      - ./10_Deleting:/workspace/10
+      - ./11_Indexing:/workspace/11
+      - spark_home:/tmp
+
+  jupyter:
+    image: jupyter/pyspark-notebook:latest
+    container_name: jupyter-notebook
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./data:/home/jovyan/work/data
+      - ./01_Getting_&_Knowing_Your_Data:/home/jovyan/work/01
+      - ./02_Filtering_&_Sorting:/home/jovyan/work/02
+      - ./03_Grouping:/home/jovyan/work/03
+      - ./04_Apply:/home/jovyan/work/04
+      - ./05_Merge:/home/jovyan/work/05
+      - ./06_Stats:/home/jovyan/work/06
+      - ./07_Visualization:/home/jovyan/work/07
+      - ./08_Creating_Series_and_DataFrames:/home/jovyan/work/08
+      - ./09_Time_Series:/home/jovyan/work/09
+      - ./10_Deleting:/home/jovyan/work/10
+      - ./11_Indexing:/home/jovyan/work/11
+    depends_on:
+      - spark
+
+volumes:
+  spark_home:
